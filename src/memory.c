@@ -154,6 +154,7 @@ int gc(struct workspace_t *workspace) {
     return gc_force(workspace);
   }
 #endif
+return 0;
 }
 
 int gc_force(struct workspace_t *workspace) {
