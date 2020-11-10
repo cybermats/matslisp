@@ -5,7 +5,8 @@
 #ifndef MATSLISP_SRC_ERROR_HANDLING_H_
 #define MATSLISP_SRC_ERROR_HANDLING_H_
 
-int error_init();
+#include <setjmp.h>
+extern jmp_buf exception;
 void fatal(const char *reason, ...);
 void error(const char *reason, ...);
 

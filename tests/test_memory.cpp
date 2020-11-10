@@ -27,7 +27,7 @@ TEST_CASE("set up workspace", "[workspace]") {
 
 TEST_CASE("allocate object", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   REQUIRE(obj);
   CHECK_ALIVE(obj);
   obj_free(workspace, obj);
@@ -39,7 +39,7 @@ TEST_CASE("allocate object", "[workspace]") {
 TEST_CASE("push_root_basic", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
   REQUIRE_FALSE(workspace->root);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   push_root(workspace, obj);
   REQUIRE(workspace->root);
   REQUIRE(workspace->root->head == obj);
@@ -51,7 +51,7 @@ TEST_CASE("push_root_basic", "[workspace]") {
 TEST_CASE("gc", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-1);
   REQUIRE(gc(workspace) == 1);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE);
@@ -60,7 +60,7 @@ TEST_CASE("gc", "[workspace]") {
 
 TEST_CASE("push_root_gc", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   push_root(workspace, obj);
   REQUIRE_FALSE(gc(workspace));
   CHECK_ALIVE(obj);
@@ -72,7 +72,7 @@ TEST_CASE("push_root_gc", "[workspace]") {
 
 TEST_CASE("gc_links_SYMBOL", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   obj->type = SYMBOL;
   push_root(workspace, obj);
   REQUIRE(gc(workspace) == 0);
@@ -84,7 +84,7 @@ TEST_CASE("gc_links_SYMBOL", "[workspace]") {
 
 TEST_CASE("gc_links_NUMBER", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   obj->type = NUMBER;
   push_root(workspace, obj);
   REQUIRE(gc(workspace) == 0);
@@ -96,11 +96,11 @@ TEST_CASE("gc_links_NUMBER", "[workspace]") {
 
 TEST_CASE("gc_links_LAMBDA", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   obj->type = LAMBDA;
   obj->args = nullptr;
   push_root(workspace, obj);
-  struct object *arg = obj_alloc(workspace);
+  oop arg = obj_alloc(workspace);
   arg->head = nullptr;
   arg->tail = nullptr;
   obj->args = arg;
@@ -117,21 +117,21 @@ TEST_CASE("gc_links_LAMBDA", "[workspace]") {
 
 TEST_CASE("gc_links_PAIR", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
-  struct object *obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-1);
   obj->type = PAIR;
   obj->head = nullptr;
   obj->tail = nullptr;
   push_root(workspace, obj);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-2);
-  struct object *head = obj_alloc(workspace);
+  oop head = obj_alloc(workspace);
   head->head = nullptr;
   head->tail = nullptr;
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-3);
   obj->head = head;
   CHECK_ALIVE(obj);
   CHECK_ALIVE(head);
-  struct object *tail = obj_alloc(workspace);
+  oop tail = obj_alloc(workspace);
   tail->head = nullptr;
   tail->tail = nullptr;
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-4);

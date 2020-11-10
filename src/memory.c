@@ -14,7 +14,7 @@ struct workspace_t* create_workspace(int workspace_size) {
     return NULL;
 
   size_t pool_size = sizeof(struct object);
-  workspace->pool = (struct object*) malloc(workspace_size * pool_size);
+  workspace->pool = (oop) malloc(workspace_size * pool_size);
   if (!workspace->pool) {
     free(workspace);
     return NULL;
@@ -26,7 +26,7 @@ struct workspace_t* create_workspace(int workspace_size) {
   workspace->root = NULL;
 
   for (int i = workspace_size - 1; i >= 0; --i) {
-    struct object* obj = &workspace->pool[i];
+    oop obj = &workspace->pool[i];
     obj->head = NULL;
     obj->tail = workspace->free_list;
     workspace->free_list = obj;
@@ -47,12 +47,12 @@ void free_workspace(struct workspace_t *workspace) {
   }
 }
 
-struct object* obj_alloc(struct workspace_t* workspace) {
+oop obj_alloc(struct workspace_t* workspace) {
   gc(workspace);
   if (workspace->free_space == 0)
     fatal("no room");
 
-  struct object* tmp = workspace->free_list;
+  oop tmp = workspace->free_list;
   workspace->free_list = workspace->free_list->tail;
   workspace->free_space--;
 #ifndef NDEBUG
@@ -61,10 +61,10 @@ struct object* obj_alloc(struct workspace_t* workspace) {
   return tmp;
 }
 
-struct object* obj_alloc_without_gc(struct workspace_t* workspace) {
+oop obj_alloc_without_gc(struct workspace_t* workspace) {
   if (workspace->free_space == 0)
     fatal("no room");
-  struct object* tmp = workspace->free_list;
+  oop tmp = workspace->free_list;
   workspace->free_list = workspace->free_list->tail;
   workspace->free_space--;
 #ifndef NDEBUG
@@ -74,7 +74,7 @@ struct object* obj_alloc_without_gc(struct workspace_t* workspace) {
 }
 
 
-void obj_free(struct workspace_t* workspace, struct object* obj) {
+void obj_free(struct workspace_t* workspace, oop obj) {
   obj->head = NULL;
   obj->tail = workspace->free_list;
   workspace->free_list = obj;
@@ -84,7 +84,7 @@ void obj_free(struct workspace_t* workspace, struct object* obj) {
 #endif
 }
 
-void push_root(struct workspace_t *workspace, struct object* obj) {
+void push_root(struct workspace_t *workspace, oop obj) {
   struct object *cons = obj_alloc_without_gc(workspace);
   cons->head = obj;
   cons->tail= workspace->root;
@@ -98,11 +98,11 @@ void pop_root(struct workspace_t *workspace) {
 #define MARKBIT 1
 
 void mark(struct object *obj) {
-  obj->head = (struct object*)(((uintptr_t)obj->head) | MARKBIT);
+  obj->head = (oop)(((uintptr_t)obj->head) | MARKBIT);
 }
 
 void unmark(struct object *obj) {
-  obj->head = (struct object*)(((uintptr_t)obj->head) & ~MARKBIT);
+  obj->head = (oop)(((uintptr_t)obj->head) & ~MARKBIT);
 }
 
 int marked(struct object *obj) {
@@ -166,7 +166,8 @@ int gc_force(struct workspace_t *workspace) {
   sweep(workspace);
   int freed = workspace->free_space - start;
 #ifndef NDEBUG
-  fprintf(stderr,"GC: %d freed.\n",  freed);
+  if (freed != 0)
+    fprintf(stderr,"GC: %d freed.\n",  freed);
 #endif
   return freed;
 }

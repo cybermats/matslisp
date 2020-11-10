@@ -8,28 +8,32 @@
 #include <stdlib.h>
 
 struct object;
+typedef struct object *oop;
 
 struct workspace_t {
-  struct object *pool;
-  struct object *free_list;
+  oop pool;
+  oop free_list;
   int free_space;
-  struct object *root;
+  oop root;
   int total_space;
-  struct object *env;
+  oop env;
 };
+
+#define n_push(OBJ) push_root(workspace, (OBJ));
+#define n_pop() pop_root(workspace);
 
 struct workspace_t* create_workspace(int workspace_size);
 void free_workspace(struct workspace_t *workspace);
 
 
-struct object* obj_alloc(struct workspace_t* workspace);
-struct object* obj_alloc_without_gc(struct workspace_t* workspace);
-void obj_free(struct workspace_t* workspace, struct object* obj);
+oop obj_alloc(struct workspace_t* workspace);
+oop obj_alloc_without_gc(struct workspace_t* workspace);
+void obj_free(struct workspace_t* workspace, oop obj);
 
-void push_root(struct workspace_t *workspace, struct object* obj);
+void push_root(struct workspace_t *workspace, oop obj);
 void pop_root(struct workspace_t *workspace);
 
-void markobject(struct object *obj);
+void markobject(oop obj);
 void sweep(struct workspace_t *workspace);
 
 int gc(struct workspace_t *workspace);

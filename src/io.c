@@ -9,7 +9,7 @@
 #include "strings.h"
 #include "memory.h"
 
-struct object* read_digits(struct workspace_t* workspace, FILE *fp, int c) {
+oop read_digits(struct workspace_t* workspace, FILE *fp, int c) {
   static char buffer[1024];
   char* buf_ptr = buffer;
   do {
@@ -38,12 +38,12 @@ struct object *read_letter(struct workspace_t *workspace, FILE *fp, int c) {
     return new_symbol(workspace, symbol);
   return new_symbol(workspace, pack40(buffer, buffer_size));
 }
-struct object* read(struct workspace_t* workspace, FILE *fp) {
+oop read(struct workspace_t* workspace, FILE *fp) {
   for (;;) {
     int c = getc(fp);
     switch (c) {
       case EOF: {
-        return (struct object*)EOF;
+        return (oop)EOF;
       }
       case ' ':
       case '\n':
@@ -62,7 +62,7 @@ struct object* read(struct workspace_t* workspace, FILE *fp) {
         push_root(workspace, obj);
         obj = new_cons(workspace, obj, nil);
         push_root(workspace, obj);
-        struct object* sym = new_symbol(workspace, FN_QUOTE);
+        oop sym = new_symbol(workspace, FN_QUOTE);
         push_root(workspace, sym);
         obj = new_cons(workspace, sym, obj);
         pop_root(workspace);
@@ -76,7 +76,7 @@ struct object* read(struct workspace_t* workspace, FILE *fp) {
         return read_list(workspace, fp, ')');
       case ')': {
         ungetc(c, fp);
-        return (struct object*)EOF;
+        return (oop)EOF;
       }
       case '-': {
         int d=getc(fp);
@@ -98,10 +98,10 @@ struct object* read(struct workspace_t* workspace, FILE *fp) {
 
 
 struct object *checkEOF(FILE *fp, int delimiter, struct object *head);
-struct object* read_list(struct workspace_t* workspace, FILE *fp, int delimiter) {
+oop read_list(struct workspace_t* workspace, FILE *fp, int delimiter) {
   struct object *head = nil, *tail = nil;
   struct object *obj = read(workspace, fp);
-  if (obj == (struct object*)EOF)
+  if (obj == (oop)EOF)
     return checkEOF(fp, delimiter, head);
   push_root(workspace, obj);
   head = tail = new_cons(workspace, obj, nil);
@@ -109,7 +109,7 @@ struct object* read_list(struct workspace_t* workspace, FILE *fp, int delimiter)
   push_root(workspace, head);
   for (;;) {
     obj = read(workspace, fp);
-    if (obj == (struct object*)EOF) {
+    if (obj == (oop)EOF) {
       pop_root(workspace);
       return checkEOF(fp, delimiter, head);
     }

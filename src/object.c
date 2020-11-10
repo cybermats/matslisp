@@ -13,22 +13,22 @@ struct object *TEE = NULL;
 struct object *nil = NULL;
 
 
-struct object* new_symbol(struct workspace_t* workspace, symbol_t name) {
-  struct object* obj = obj_alloc(workspace);
+oop new_symbol(struct workspace_t* workspace, symbol_t name) {
+  oop obj = obj_alloc(workspace);
   obj->type = SYMBOL;
   obj->name = name;
   return obj;
 }
-struct object* new_number(struct workspace_t* workspace, int integer) {
-  struct object* obj = obj_alloc(workspace);
+oop new_number(struct workspace_t* workspace, int integer) {
+  oop obj = obj_alloc(workspace);
   obj->type = NUMBER;
   obj->integer = integer;
   return obj;
 }
 
-struct object* new_cons(struct workspace_t* workspace, struct object* head, struct object* tail) {
+oop new_cons(struct workspace_t* workspace, oop head, oop tail) {
   assert((!head || head->alive) && (!tail || tail->alive));
-  struct object* obj = obj_alloc(workspace);
+  oop obj = obj_alloc(workspace);
 #ifndef NDEBUG
   obj->type = PAIR;
 #endif

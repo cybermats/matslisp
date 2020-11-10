@@ -9,19 +9,19 @@
 #include "object.h"
 
 
-struct object *fn_quote(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_car(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_cdr(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_cons(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_equal(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_atom(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_cond(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_lambda(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_label(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_env(struct workspace_t *workspace, struct object *args, struct object *env);
-struct object *fn_gc(struct workspace_t *workspace, struct object *args, struct object *env);
+oop fn_quote(struct workspace_t *workspace, oop args, oop env);
+oop fn_car(struct workspace_t *workspace, oop args, oop env);
+oop fn_cdr(struct workspace_t *workspace, oop args, oop env);
+oop fn_cons(struct workspace_t *workspace, oop args, oop env);
+oop fn_equal(struct workspace_t *workspace, oop args, oop env);
+oop fn_atom(struct workspace_t *workspace, oop args, oop env);
+oop fn_cond(struct workspace_t *workspace, oop args, oop env);
+oop fn_lambda(struct workspace_t *workspace, oop args, oop env);
+oop fn_label(struct workspace_t *workspace, oop args, oop env);
+oop fn_env(struct workspace_t *workspace, oop args, oop env);
+oop fn_gc(struct workspace_t *workspace, oop args, oop env);
 
-typedef struct object *(*fn_ptr_type)(struct workspace_t *workspace, struct object*, struct object*);
+typedef oop (*fn_ptr_type)(struct workspace_t *workspace, oop, oop);
 
 struct tbl_entry_t {
   char* name;

@@ -9,10 +9,6 @@
 
 jmp_buf exception;
 
-int error_init() {
-  return setjmp(exception);
-}
-
 void fatal(const char *reason, ...) {
   if (reason) {
     va_list ap;

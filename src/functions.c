@@ -21,18 +21,18 @@ void lookup_built_in(symbol_t symbol, char *buffer, size_t n) {
 }
 
 
-struct object *fn_quote(struct workspace_t *workspace, struct object *args, struct object *env) {
+oop fn_quote(struct workspace_t *workspace, oop args, oop env) {
   return car(args);
 }
-struct object *fn_car(struct workspace_t *workspace, struct object *args, struct object *env) {
+oop fn_car(struct workspace_t *workspace, oop args, oop env) {
   return caar(args);
 }
-struct object *fn_cdr(struct workspace_t *workspace, struct object *args, struct object *env) {
+oop fn_cdr(struct workspace_t *workspace, oop args, oop env) {
   return cdar(args);
 }
-struct object *fn_cons(struct workspace_t *workspace, struct object *args, struct object *env) {
+oop fn_cons(struct workspace_t *workspace, oop args, oop env) {
   push_root(workspace, args);
-  struct object *list = new_cons(workspace, car(args), nil);
+  oop list = new_cons(workspace, car(args), nil);
   args = cadr(args);
   push_root(workspace, list);
   while (consp(args)) {

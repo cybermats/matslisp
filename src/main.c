@@ -8,8 +8,9 @@
 
 #define WORKSPACESIZE 1024*1024
 
-struct object *initialize_environment(struct workspace_t *workspace) {
-  char *t_str = "t\0\0\0";
+const char *t_str = "t\0\0\0";
+
+oop initialize_environment(struct workspace_t *workspace) {
   TEE = new_symbol(workspace, pack40(t_str, 4));
   push_root(workspace, TEE);
   nil = new_cons(workspace, NULL, NULL);
@@ -17,9 +18,11 @@ struct object *initialize_environment(struct workspace_t *workspace) {
   return new_cons(workspace, NULL, NULL);
 }
 
-struct object *reinitialize_environment(struct workspace_t *workspace) {
+oop reinitialize_environment(struct workspace_t *workspace) {
   workspace->root = NULL;
-  push_root(workspace, TEE);
+  n_push(workspace->env);
+  TEE = new_symbol(workspace, pack40(t_str, 4));
+  n_push(TEE);
   return workspace->env;
 }
 
@@ -27,7 +30,7 @@ struct object *reinitialize_environment(struct workspace_t *workspace) {
 int main() {
   printf("Mats Lisp v0.1\n");
   struct workspace_t* workspace = create_workspace(WORKSPACESIZE);
-  if (!error_init()) {
+  if (!setjmp(exception)) {
     workspace->env = initialize_environment(workspace);
   } else {
     reinitialize_environment(workspace);
@@ -37,10 +40,13 @@ int main() {
 #ifndef NDEBUG
     printf("Mem (%d / %d) ", workspace->total_space - workspace->free_space, workspace->total_space);
 #endif
-
+    gc(workspace);
+    fflush(stderr);
+    fflush(stdout);
     printf("> ");
-    struct object *sexp = read(workspace, stdin);
-    if (sexp == (struct object*)EOF)
+    fflush(stdout);
+    oop sexp = read(workspace, stdin);
+    if (sexp == (oop)EOF)
       break;
     push_root(workspace, sexp);
 
@@ -50,7 +56,7 @@ int main() {
     printf("\n");
 #endif
     sexp = eval(workspace, sexp, workspace->env);
-#ifndef NDEBUG
+#if 0 //ifndef NDEBUG
     printf("Env: ");
     write(stdout, workspace->env);
     printf("\nEval: ");
