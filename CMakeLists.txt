@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(matslisp C CXX)
+add_subdirectory(src)
+enable_testing()
+add_subdirectory(tests)
