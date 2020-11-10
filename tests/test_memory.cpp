@@ -10,6 +10,14 @@ extern "C" {
 
 #define WORKSPACE_SIZE 64
 
+#ifndef NDEBUG
+#define CHECK_ALIVE(obj) REQUIRE(obj->alive)
+#define CHECK_DEAD(obj) REQUIRE_FALSE(obj->alive)
+#else
+#define CHECK_ALIVE(obj) REQUIRE(obj)
+#define CHECK_DEAD(obj) REQUIRE(obj)
+#endif
+
 TEST_CASE("set up workspace", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
   REQUIRE(workspace->total_space == WORKSPACE_SIZE);
@@ -21,9 +29,9 @@ TEST_CASE("allocate object", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
   struct object *obj = obj_alloc(workspace);
   REQUIRE(obj);
-  REQUIRE(obj->alive);
+  CHECK_ALIVE(obj);
   obj_free(workspace, obj);
-  REQUIRE_FALSE(obj->alive);
+  CHECK_DEAD(obj);
   REQUIRE_FALSE(obj->head);
   free_workspace(workspace);
 }
@@ -47,7 +55,7 @@ TEST_CASE("gc", "[workspace]") {
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-1);
   REQUIRE(gc(workspace) == 1);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE);
-  REQUIRE_FALSE(obj->alive);
+  CHECK_DEAD(obj);
 }
 
 TEST_CASE("push_root_gc", "[workspace]") {
@@ -55,10 +63,10 @@ TEST_CASE("push_root_gc", "[workspace]") {
   struct object *obj = obj_alloc(workspace);
   push_root(workspace, obj);
   REQUIRE_FALSE(gc(workspace));
-  REQUIRE(obj->alive);
+  CHECK_ALIVE(obj);
   pop_root(workspace);
   REQUIRE(gc(workspace) == 2);
-  REQUIRE_FALSE(obj->alive);
+  CHECK_DEAD(obj);
 }
 
 
@@ -68,10 +76,10 @@ TEST_CASE("gc_links_SYMBOL", "[workspace]") {
   obj->type = SYMBOL;
   push_root(workspace, obj);
   REQUIRE(gc(workspace) == 0);
-  REQUIRE(obj->alive);
+  CHECK_ALIVE(obj);
   pop_root(workspace);
   REQUIRE(gc(workspace) == 2);
-  REQUIRE_FALSE(obj->alive);
+  CHECK_DEAD(obj);
 }
 
 TEST_CASE("gc_links_NUMBER", "[workspace]") {
@@ -80,31 +88,31 @@ TEST_CASE("gc_links_NUMBER", "[workspace]") {
   obj->type = NUMBER;
   push_root(workspace, obj);
   REQUIRE(gc(workspace) == 0);
-  REQUIRE(obj->alive);
+  CHECK_ALIVE(obj);
   pop_root(workspace);
   REQUIRE(gc(workspace) == 2);
-  REQUIRE_FALSE(obj->alive);
+  CHECK_DEAD(obj);
 }
 
 TEST_CASE("gc_links_LAMBDA", "[workspace]") {
   struct workspace_t* workspace = create_workspace(WORKSPACE_SIZE);
   struct object *obj = obj_alloc(workspace);
   obj->type = LAMBDA;
-  obj->args = NULL;
+  obj->args = nullptr;
   push_root(workspace, obj);
   struct object *arg = obj_alloc(workspace);
-  arg->head = NULL;
-  arg->tail = NULL;
+  arg->head = nullptr;
+  arg->tail = nullptr;
   obj->args = arg;
-  REQUIRE(obj->alive);
-  REQUIRE(arg->alive);
+  CHECK_ALIVE(obj);
+  CHECK_ALIVE(arg);
   REQUIRE(gc(workspace) == 0);
-  REQUIRE(obj->alive);
-  REQUIRE(arg->alive);
+  CHECK_ALIVE(obj);
+  CHECK_ALIVE(arg);
   pop_root(workspace);
   REQUIRE(gc(workspace) == 3);
-  REQUIRE_FALSE(obj->alive);
-  REQUIRE_FALSE(arg->alive);
+  CHECK_DEAD(obj);
+  CHECK_DEAD(arg);
 }
 
 TEST_CASE("gc_links_PAIR", "[workspace]") {
@@ -112,34 +120,34 @@ TEST_CASE("gc_links_PAIR", "[workspace]") {
   struct object *obj = obj_alloc(workspace);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-1);
   obj->type = PAIR;
-  obj->head = NULL;
-  obj->tail = NULL;
+  obj->head = nullptr;
+  obj->tail = nullptr;
   push_root(workspace, obj);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-2);
   struct object *head = obj_alloc(workspace);
-  head->head = NULL;
-  head->tail = NULL;
+  head->head = nullptr;
+  head->tail = nullptr;
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-3);
   obj->head = head;
-  REQUIRE(obj->alive);
-  REQUIRE(head->alive);
+  CHECK_ALIVE(obj);
+  CHECK_ALIVE(head);
   struct object *tail = obj_alloc(workspace);
-  tail->head = NULL;
-  tail->tail = NULL;
+  tail->head = nullptr;
+  tail->tail = nullptr;
   REQUIRE(workspace->free_space == WORKSPACE_SIZE-4);
   obj->tail = tail;
-  REQUIRE(obj->alive);
-  REQUIRE(head->alive);
-  REQUIRE(tail->alive);
+  CHECK_ALIVE(obj);
+  CHECK_ALIVE(head);
+  CHECK_ALIVE(tail);
   REQUIRE(gc(workspace) == 0);
-  REQUIRE(obj->alive);
-  REQUIRE(head->alive);
-  REQUIRE(tail->alive);
+  CHECK_ALIVE(obj);
+  CHECK_ALIVE(head);
+  CHECK_ALIVE(tail);
   pop_root(workspace);
   REQUIRE(gc(workspace) == 4);
   REQUIRE(workspace->free_space == WORKSPACE_SIZE);
-  REQUIRE_FALSE(obj->alive);
-  REQUIRE_FALSE(head->alive);
-  REQUIRE_FALSE(tail->alive);
+  CHECK_DEAD(obj);
+  CHECK_DEAD(head);
+  CHECK_DEAD(tail);
 }
 
