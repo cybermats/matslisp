@@ -13,7 +13,7 @@ int error_init() {
   return setjmp(exception);
 }
 
-void fatal(char *reason, ...) {
+void fatal(const char *reason, ...) {
   if (reason) {
     va_list ap;
     va_start(ap, reason);
@@ -25,7 +25,7 @@ void fatal(char *reason, ...) {
   exit(1);
 }
 
-void error(char *reason, ...) {
+void error(const char *reason, ...) {
   if (reason) {
     va_list ap;
     va_start(ap, reason);
